@@ -3,18 +3,8 @@ import requests
 import json
 
 
-def get_json(PageNum=1, PageSize=16, Capacity=3, StartDate=..., EndDate=..., City='city-ramsar'):
-    json_data = {
-        'page-size': PageSize,
-        'capacity': Capacity,
-        'page-number': PageNum,
-        'date': {
-            'start': 20240219,
-            'end': 20240220,
-        },
-    }
-
-    return requests.post(f'https://gw.jabama.com/api/v4/keyword/{ City }', json=json_data).json()
+def get_json(json_data, city_kw): 
+    return requests.post(f'https://gw.jabama.com/api/v4/keyword/{ city_kw }', json=json_data).json()
 
 
 def get_accommodation_dict(accomm, accomm_dict = {}): # Structure of keys : (our_dict_key_name, api_parent_key_name, api_key_name) or (key_name, parent_key_name)
@@ -31,26 +21,65 @@ def write_data(accomm_list):
     with open(f'accommodations_data.json', 'w') as f : json.dump(accomm_list, f)
 
 
-def col_city(city_keyword):
-    data, PageNum, accommodations_list = get_json(PageNum=1, City=city_keyword), 1, []
+def col_city(city_kw, json_data):
+    data, accommodations_list = get_json(json_data, city_kw=city_kw), []
     total = data['result']['total']
 
     while data['result']['items']:
-        print(f"Collecting page { PageNum } of city { city_keyword.split('-')[1] }...")
+        print(f"Collecting page { json_data['page-number'] } of city { city_kw.split('-')[1] }...")
 
         for accomm in data['result']['items']: 
             accommodations_list.append( get_accommodation_dict(accomm) )
 
         print(f'Collected { len( accommodations_list ) } / { total }')
 
-        PageNum += 1
-        data = get_json(PageNum=PageNum, City=city_keyword)
+        json_data['page-number'] += 1
+        data = get_json(json_data, city_kw=city_kw)
 
     return accommodations_list
 
 
-accom_list = []
-for city in cities:
-    accom_list += col_city(city)
+def col_all(json_data):
+    accom_list = []
+    for city in cities:
+        accom_list += col_city(city, json_data)
+        json_data['page-num']
 
-write_data( accom_list )
+    write_data( accom_list )
+
+
+def init(): 
+    global inputs
+    inputs = {
+        'primary inputs': {
+            'city': input(),
+            'start_date': input(),
+            'end_date': input(),
+            'capacity': int(input())
+        },
+
+        'secondary inputs': {
+            'bedroomsCount': {'value': 0, 'importance': 0},
+            'toiletsCount': {'value': 0, 'importance': 0},
+            'amentities': [ {'value': 0, 'importance': 0} ],
+            'types': [ {'value': 0, 'importance': 0} ],
+            'price': {'value': 0, 'importance': 0}
+        }
+    }
+
+
+def main():
+    init()
+    json_data = {
+        'page-size': 16,
+        'capacity': inputs['primary inputs']['capacity'],
+        'page-number': 1,
+        'date': {
+            'start': inputs['primary inputs']['start_date'],
+            'end': inputs['primary inputs']['start_date'],
+        },
+    }
+    col_all(json_data)
+
+
+main()

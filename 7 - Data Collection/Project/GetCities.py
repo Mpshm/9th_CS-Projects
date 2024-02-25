@@ -12,4 +12,4 @@ for alph in alphabets:
             kw = city['app']['keyword'] 
             if kw.split('-')[0] == 'city' : cities.add( f"{ city['app']['keyword'] }\n" )
 
-with open('cities.txt', 'w') as f: f.writelines( cities )
+with open('cities.py', 'w') as f: f.write( str(cities) )
