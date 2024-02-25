@@ -1,6 +1,6 @@
 # 9th - CS Projects
 
-Projects :
+### Projects :
 
 - Path Finding Algorithms
 
@@ -8,4 +8,4 @@ Projects :
 
 - Data Collection : Requests lib
 
-    By Parsa.Sh & Sina.P
+## By [Parsa.Sh](https://github.com/Mpshm) & [Sina.P](https://github.com/SinaPourkashani)
