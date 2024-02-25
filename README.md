@@ -7,3 +7,5 @@ Projects :
 - Image Processing : OpenCV2 lib
 
 - Data Collection : Requests lib
+
+* By Parsa.Sh & Sina.P
