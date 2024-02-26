@@ -2,6 +2,14 @@ from cities import cities
 import requests
 import json
 
+min_price = float('inf')
+max_price = 0
+
+min_bathroom = float('inf')
+max_bathroom = 0
+
+min_room = float('inf')
+max_room = 0
 
 def get_json(json_data, city_kw): 
     return requests.post(f'https://gw.jabama.com/api/v4/keyword/{ city_kw }', json=json_data).json()
@@ -12,7 +20,17 @@ def get_accommodation_dict(accomm, accomm_dict = {}): # Structure of keys : (our
     for key in keys_list : accomm_dict[ key[0] ] = accomm[ key[1] ][ key[2] ] if len(key) == 3 else accomm[ key[1] ][ key[0] ] if key[1] else accomm[ key[0] ]
 
     accomm_dict['amenities'] = [ item['name'] for item in accomm['amenities'] ]
-    accomm_dict['url'] = f"https://www.jabama.com/stay/villa-{ accomm['code'] }"
+    accomm_dict['url'] = f"https://www.jabama.com/stay/{ accomm_dict['type'] }-{ accomm['code'] }"
+
+    min_price = min(min_price, accomm_dict['price_perNight'])
+    max_price = max(max_price, accomm_dict['price_perNight'])
+
+    min_bathroom = min(min_bathroom, accomm_dict['toiletsCount'])
+    max_bathroom = max(max_bathroom, accomm_dict['toiletsCount'])
+
+
+    min_room = min(min_room, accomm_dict['bedroomsCount'])
+    max_room = max(max_room, accomm_dict['bedroomsCount'])
 
     return accomm_dict
 
@@ -48,6 +66,9 @@ def col_all(json_data):
     write_data( accom_list )
 
 
+def get_score(accomm):
+    pass
+
 def init(): 
     global inputs
     inputs = {
@@ -79,7 +100,9 @@ def main():
             'end': inputs['primary inputs']['start_date'],
         },
     }
-    col_all(json_data)
+    data, scores = col_city(inputs['city'], json_data), {}
+    for accomm in data:
+        scores[ accomm['url'] ] = get_score(accomm)
 
 
 main()
