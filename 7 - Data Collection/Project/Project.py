@@ -59,8 +59,9 @@ def col_all(json_data):
 def get_score(accomm):
     pass
 
+
 def init(): 
-    global inputs
+    global inputs, json_data
     inputs = {
         'primary inputs': {
             'city': input(),
@@ -78,9 +79,6 @@ def init():
         }
     }
 
-
-def main():
-    init()
     json_data = {
         'page-size': 16,
         'capacity': inputs['primary inputs']['capacity'],
@@ -90,6 +88,10 @@ def main():
             'end': inputs['primary inputs']['start_date'],
         },
     }
+
+
+def main():
+    init()
     scores = {}
     for accomm in col_city(inputs['city'], json_data):
         scores[ accomm['url'] ] = get_score(accomm)
