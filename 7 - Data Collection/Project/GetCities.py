@@ -10,6 +10,7 @@ for alph in alphabets:
     if res:
         for city in res['items']:
             kw = city['app']['keyword'] 
-            if kw.split('-')[0] == 'city' : cities.add( f"{ city['app']['keyword'] }\n" )
+            if kw.split('-')[0] == 'city' : cities.add( f"{ city['app']['keyword'] }" )
 
-with open('cities.py', 'w') as f: f.write( str(cities) )
+cities = str(cities).replace(',', ',\n')
+with open('7 - Data Collection/Project/cities.py', 'w') as f: f.write( f'cities = { cities }' )
