@@ -94,5 +94,6 @@ def main():
     for accomm in col_city(inputs['city'], json_data):
         scores[ accomm['url'] ] = get_score(accomm)
 
+    return sorted(scores, key=lambda k: scores[k])
 
 main()
