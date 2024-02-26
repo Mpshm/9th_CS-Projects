@@ -2,17 +2,16 @@ from cities import cities
 import requests
 import json
 
-min_price = float('inf')
-max_price = 0
-
-min_bathroom = float('inf')
-max_bathroom = 0
-
-min_room = float('inf')
-max_room = 0
 
 def get_json(json_data, city_kw): 
     return requests.post(f'https://gw.jabama.com/api/v4/keyword/{ city_kw }', json=json_data).json()
+
+
+price_range, bathroom_range, bedroom_range = (float('inf'), 0), (float('inf'), 0), (float('inf'), 0) # (min, max)
+def set_range(accomm_dict):
+    price_range = ( min(price_range[0], accomm_dict['price_perNight']), max(price_range[1], accomm_dict['price_perNight']) )
+    bathroom_range = ( min(bathroom_range[0], accomm_dict['toiletsCount']), max(bathroom_range[1], accomm_dict['toiletsCount']) )
+    bedroom_range = ( min(bedroom_range[0], accomm_dict['bedroomsCount']), max(bedroom_range[1], accomm_dict['bedroomsCount']) )
 
 
 def get_accommodation_dict(accomm, accomm_dict = {}): # Structure of keys : (our_dict_key_name, api_parent_key_name, api_key_name) or (key_name, parent_key_name)
@@ -22,16 +21,7 @@ def get_accommodation_dict(accomm, accomm_dict = {}): # Structure of keys : (our
     accomm_dict['amenities'] = [ item['name'] for item in accomm['amenities'] ]
     accomm_dict['url'] = f"https://www.jabama.com/stay/{ accomm_dict['type'] }-{ accomm['code'] }"
 
-    min_price = min(min_price, accomm_dict['price_perNight'])
-    max_price = max(max_price, accomm_dict['price_perNight'])
-
-    min_bathroom = min(min_bathroom, accomm_dict['toiletsCount'])
-    max_bathroom = max(max_bathroom, accomm_dict['toiletsCount'])
-
-
-    min_room = min(min_room, accomm_dict['bedroomsCount'])
-    max_room = max(max_room, accomm_dict['bedroomsCount'])
-
+    set_range( accomm_dict )
     return accomm_dict
 
 
@@ -100,8 +90,8 @@ def main():
             'end': inputs['primary inputs']['start_date'],
         },
     }
-    data, scores = col_city(inputs['city'], json_data), {}
-    for accomm in data:
+    scores = {}
+    for accomm in col_city(inputs['city'], json_data):
         scores[ accomm['url'] ] = get_score(accomm)
 
 
