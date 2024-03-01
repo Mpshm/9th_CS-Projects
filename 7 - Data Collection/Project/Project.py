@@ -7,11 +7,8 @@ def get_json(json_data, city_kw):
     return requests.post(f'https://gw.jabama.com/api/v4/keyword/{ city_kw }', json=json_data).json()
 
 
-price_range, bathroom_range, bedroom_range = (float('inf'), 0), (float('inf'), 0), (float('inf'), 0) # (min, max)
-def set_range(accomm_dict):
-    price_range = ( min(price_range[0], accomm_dict['price_perNight']), max(price_range[1], accomm_dict['price_perNight']) )
-    bathroom_range = ( min(bathroom_range[0], accomm_dict['toiletsCount']), max(bathroom_range[1], accomm_dict['toiletsCount']) )
-    bedroom_range = ( min(bedroom_range[0], accomm_dict['bedroomsCount']), max(bedroom_range[1], accomm_dict['bedroomsCount']) )
+def set_max(accomm_dict):
+    for title in scores_max: scores_max[title] = max(scores_max[title], accomm_dict[title])
 
 
 def get_accommodation_dict(accomm, accomm_dict = {}): # Structure of keys : (our_dict_key_name, api_parent_key_name, api_key_name) or (key_name, parent_key_name)
@@ -21,7 +18,7 @@ def get_accommodation_dict(accomm, accomm_dict = {}): # Structure of keys : (our
     accomm_dict['amenities'] = [ item['name'] for item in accomm['amenities'] ]
     accomm_dict['url'] = f"https://www.jabama.com/stay/{ accomm_dict['type'] }-{ accomm['code'] }"
 
-    set_range( accomm_dict )
+    set_max( accomm_dict )
     return accomm_dict
 
 
@@ -56,12 +53,21 @@ def col_all(json_data):
     write_data( accom_list )
 
 
-def get_score(accomm):
-    pass
+def calc_score(accomm, title):
+    title_data, is_related = inputs['secondary inputs'][title], lambda x: x in accomm['amentities'] if title == 'amentities' else x == accomm['type']
+    if type(title_data) != list : return title_data['importance'] * ( title_data['value'] - accomm[title] ) / scores_max[title]
+    else : return sum([ 0 if is_related( item['value'] ) else item['importance'] for item in title_data ])
+
+
+def get_scores(accomm):
+    scores = 0
+    for title in inputs['secondary inputs']: scores += calc_score(accomm, title)
+    return scores
 
 
 def init(): 
-    global inputs, json_data
+    global inputs, json_data, scores_max
+    scores_max = {'price_perNight': 0, 'toiletsCount': 0, 'bedroomsCount': 0}
     inputs = {
         'primary inputs': {
             'city': input(),
@@ -92,9 +98,9 @@ def init():
 
 def main():
     init()
-    scores = {}
-    for accomm in col_city(inputs['city'], json_data):
-        scores[ accomm['url'] ] = get_score(accomm)
+    cities_data, scores = col_city(inputs['city'], json_data), {}
+    for accomm in cities_data:
+        scores[ accomm['url'] ] = get_scores(accomm)
 
     return sorted(scores, key=lambda k: scores[k])
 
