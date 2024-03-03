@@ -57,7 +57,7 @@ def col_all():
 
 def calc_score(accomm, title):
     title_data = inputs['secondary inputs'][title] # is_related = lambda x: x in accomm['amenities'] if title == 'amenities' else x == accomm['type']
-    if type(title_data) != list : return title_data['importance'] * ( title_data['value'] - accomm[title] ) / scores_max[title]
+    if type(title_data) != list : return title_data['importance'] * abs( title_data['value'] - accomm[title] ) / scores_max[title]
     elif title == 'amenities' : return sum([ 0 if item['value'] in accomm['amenities'] else item['importance'] for item in title_data ])
     else : return sum([ 0 if item['value'] == accomm['type'] else item['importance'] for item in title_data ])
 
