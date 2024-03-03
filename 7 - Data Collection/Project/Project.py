@@ -98,7 +98,7 @@ def init():
 
 def main():
     init()
-    cities_data, scores = col_city(inputs['city'], json_data), {}
+    cities_data, scores = col_city(inputs['primary inputs']['city'], json_data), {}
     for accomm in cities_data:
         scores[ accomm['url'] ] = get_scores(accomm)
 
